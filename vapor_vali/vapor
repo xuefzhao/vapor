@@ -279,11 +279,7 @@ else:
 									if not sv_pos in out['TANDUP']:	
 										out['TANDUP'].append(sv_pos)
 										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['TANDUP'])
-								elif sv_type in ['CNV','CSV','CPX']: 
-									if not 'UNKNOWN' in list(out.keys()):	out['UNKNOWN']=[]
-									if not sv_pos in out['UNKNOWN']:
-										out['UNKNOWN'].append(sv_pos)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['UNKNOWN'])
+								elif sv_type in ['CNV','CSV','CPX']: continue
 								else:
 									if 'Other=' in pin[7]:
 										info=[i for i in pin[7].split(';') if i[:6]=='Other=']
@@ -297,99 +293,6 @@ else:
 										vcf_rec_hash[rec]=':'.join([str(i) for i in ['_'.join(i.split('/')) for i in sv_other_info[:2]]+sv_other_info[2].split(':')+['CANNOT_CLASSIFY']])
 				fin.close()
 				return [out,vcf_rec_hash]
-			def vcf_rec_readin(file_in):
-				out={}
-				fin=open(file_in)
-				rec=-1
-				vcf_rec_hash={}
-				vcf_rec_hash_2={}
-				for line in fin:
-					rec+=1
-					pin=line.strip().split()
-					if not pin[0][0]=='#':
-						#if pin[6]=='PASS':
-							pin[7]=pin[7].replace('MERGE_TYPE=','SVTYPE=')
-							sv_type=svtype_extract(pin)
-							sv_pos=chr_start_end_extract(pin)
-							#if sv_type in ['tandup','TANDUP']:
-							#	genotypes=genoCN_extract(pin)
-							#else:
-							#	genotypes=genotype_extract(pin)
-							genotypes=[0,1]
-							if not sum(genotypes)==0:
-								if sv_type in ['del','DEL','deletion']:
-									if not 'DEL' in list(out.keys()):		out['DEL']=[]
-									if not sv_pos in out['DEL']:	
-										out['DEL'].append(sv_pos)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['DEL'])
-										vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['inv','INV','inversion']:
-									if not 'INV' in list(out.keys()):		out['INV']=[]
-									if not sv_pos in out['INV']:	
-										out['INV'].append(sv_pos)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['INV'])
-										vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['ins','INS','insertion','LINE1','SVA','ALU','HERVK']:
-									SV_len=int(sv_len_extract(pin))
-									INS_Seq=sv_seq_extract(pin)
-									if SV_len>0:
-										if not 'INS' in list(out.keys()):		out['INS']=[]
-										if not sv_pos in out['INS']:	
-											out['INS'].append(sv_pos[:2]+[SV_len,INS_Seq])
-											vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos[:2]+[SV_len]]+['INS'])
-											vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['disdup','DISDUP','dis-dup']:
-									insert_point=sv_insert_point_define(pin)
-									if not 'DISDUP' in list(out.keys()):		out['DISDUP']=[]
-									if not sv_pos in out['DISDUP']:	
-										out['DISDUP'].append(sv_pos+insert_point)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos+insert_point]+['DISDUP'])
-										vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['DEL_INV','del_inv']:
-									if not 'DEL_INV' in list(out.keys()):		out['DEL_INV']=[]
-									del_inv_info= del_inv_interprete(pin)
-									if not del_inv_info=='error':
-										if not del_inv_info in out['DEL_INV']:	
-											out['DEL_INV'].append(del_inv_info)
-											vcf_rec_hash[rec]=':'.join(['_'.join([str(i) for i in j]) for j in del_inv_info]+['DEL_INV'])
-											vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['DUP_INV','dup_inv']:	
-									if not 'DUP_INV' in list(out.keys()):		out['DUP_INV']=[]
-									dup_inv_info=dup_inv_interprete(pin)
-									if not dup_inv_info=='error':
-										if not dup_inv_info in out['DUP_INV']:	
-											out['DUP_INV'].append(dup_inv_info)
-											vcf_rec_hash[rec]=':'.join([str(i) for i in dup_inv_info+['DUP_INV']])
-											vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['tandup','TANDUP','DUP']:
-									if not 'TANDUP' in list(out.keys()):	out['TANDUP']=[]
-									if not sv_pos in out['TANDUP']:	
-										out['TANDUP'].append(sv_pos)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['TANDUP'])
-										vcf_rec_hash_2[rec]=pin
-								elif sv_type in ['CNV','CSV','CPX']: 
-									if not 'UNKNOWN' in list(out.keys()):	out['UNKNOWN']=[]
-									if not sv_pos in out['UNKNOWN']:
-										out['UNKNOWN'].append(sv_pos)
-										vcf_rec_hash[rec]=':'.join([str(i) for i in sv_pos]+['UNKNOWN'])
-										vcf_rec_hash_2[rec]=pin
-								else:
-									if 'Other=' in pin[7]:
-										info=[i for i in pin[7].split(';') if i[:6]=='Other=']
-									elif 'OTHER=' in pin[7]:
-										info=[i for i in pin[7].split(';') if i[:6]=='OTHER=']
-									else: continue
-									sv_other_info=info[0].split('=')[1].split('_')
-									if not 'Other' in list(out.keys()):	out['Other']=[]
-									if not ['_'.join(i.split('/')) for i in sv_other_info[:2]]+sv_other_info[2].split(':') in out['Other']:	
-										out['Other'].append(['_'.join(i.split('/')) for i in sv_other_info[:2]]+sv_other_info[2].split(':'))
-										vcf_rec_hash[rec]=':'.join([str(i) for i in ['_'.join(i.split('/')) for i in sv_other_info[:2]]+sv_other_info[2].split(':')+['CANNOT_CLASSIFY']])
-										vcf_rec_hash_2[rec]=pin
-				fin.close()
-				final_out={}
-				for rec in vcf_rec_hash_2.keys():
-					final_out[vcf_rec_hash[rec]]=vcf_rec_hash_2[rec]
-				return final_out
 			#command='vapor vcf --sv-input /scratch/remills_flux/xuefzhao/SV_discovery_index/download/HG00512.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.vcf --output-path /scratch/remills_flux/xuefzhao/SV_discovery_index/download/HG00512.vcf.vapor/  --reference /scratch/remills_flux/xuefzhao/reference/GRCh38.1KGP/GRCh38_full_analysis_set_plus_decoy_hla.fa --pacbio-input /nfs/turbo/remillsscr/scratch2_trans/datasets/1000genomes/vol1/ftp/data_collections/hgsv_sv_discovery/PacBio/alignment/HG00512.XXX.bam'
 			from vapor_vali.Simple_function import *
 			opts,args=getopt.getopt(sys.argv[2:],'i:',['sv-input=','reference=','pacbio-input=','output-path=','sv-type=','size-cff=','PB-supp='])
@@ -481,8 +384,7 @@ else:
 							write_output_main(vcf_input+'.vapor',result_organize_ins([key_event,vapor_score_event]))
 				else:
 					print (x)
-			vcf_hash=vcf_rec_readin(vcf_input)
-			vcf_vapor_modify(vcf_input,vcf_hash)
+			vcf_vapor_modify(vcf_input,vcf_rec_hash_new)
 	elif function_name=='svelter':
 		#command='vapor svelter --sv-input /scratch/remills_flux/xuefzhao/SV_discovery_index/download/SVelter.version16/HG00512.alt_bwamem_GRCh38DH.20150715.CHS.high_coverage.svelter --output-path /scratch/remills_flux/xuefzhao/SV_discovery_index/download/SVelter.version16/HG00512.svelter.vapor/  --reference /scratch/remills_flux/xuefzhao/reference/GRCh38.1KGP/GRCh38_full_analysis_set_plus_decoy_hla.fa --pacbio-input /nfs/turbo/remillsscr/scratch2_trans/datasets/1000genomes/vol1/ftp/data_collections/hgsv_sv_discovery/PacBio/alignment/HG00512.XXX.bam'
 		def Command_parametre_readin():

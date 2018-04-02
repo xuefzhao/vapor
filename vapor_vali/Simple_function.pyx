@@ -1957,6 +1957,7 @@ def vcf_vapor_modify(vcf_input,vcf_rec_hash_new):
         if k1 in keep_rec:
             print('\t'.join([str(i) for i in vcf_info_hash[k1]]), file=fo)
     fo.close()
+
 def vcf_vapor_modify(vcf_input,vcf_rec_hash_new):
     vapor_input=vcf_input+'.vapor'
     vapor_rec={}
@@ -2013,36 +2014,6 @@ def vcf_vapor_modify(vcf_input,vcf_rec_hash_new):
     for k1 in sorted(vcf_info_hash.keys()):
         if k1 in keep_rec:
             print('\t'.join([str(i) for i in vcf_info_hash[k1]]), file=fo)
-    fo.close()
-
-def vcf_vapor_modify(vcf_input,vcf_hash):
-    [header,info]=[[],[]]
-    fin=open(vcf_input)
-    for line in fin:
-        pin=line.strip().split()
-        if pin[0][:2]=='##': header.append(pin)
-        elif pin[0][0]=='#': info.append(pin)
-    fin.close()
-    vapor_input=vcf_input+'.vapor'
-    info_hash={}
-    fin=open(vapor_input)
-    for line in fin:
-        pin=line.strip().split()
-        if not pin[0]=='CHR':
-            info_hash[pin[0]]=[]
-            VaPoR_GS=round(float(pin[2]),2) if not pin[2]=='NA' else pin[2]
-            VaPoR_GT=pin[3]
-            VaPoR_GQ=round(float(pin[4]),2) if not pin[4]=='NA' else pin[4]
-            VaPoR_REC=pin[5]
-            vcf_hash[pin[0]][7]+=';VaPor_GS='+str(VaPoR_GS)+';VaPor_GT='+str(VaPoR_GT)+';VaPor_GQ='+str(VaPoR_GQ)+';VaPor_REC='+str(VaPoR_REC)
-    fin.close()  
-    fo=open(vapor_input,'w')
-    for i in header:
-        print(' '.join(i), file=fo)
-    for i in info:
-        print('\t'.join(i), file=fo)
-    for i in vcf_hash.keys():
-        print('\t'.join(vcf_hash[i]), file=fo)
     fo.close()
 
 def window_size_refine(seq2,region_QC_Cff=0.4):

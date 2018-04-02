@@ -10,7 +10,7 @@ setup(
    author_email="xuefzhao@umich.edu",
    description="PacBio long read based genomic structural variants validator.",
    packages=["vapor_vali"],
-   scripts=["vapor_vali/vapor","vapor_vali/vapor_pdf"],
+   scripts=["vapor_vali/vapor"],
    package_data={
        "vapor_vali": [
            "templates/pred_config",
@@ -20,7 +20,7 @@ setup(
    },
     ext_modules = cythonize("vapor_vali/*.pyx"),
      install_requires=[
-     'cython', 'numpy','scipy','matplotlib','scikit-learn==0.18.1'
+     'cython', 'numpy','scipy','matplotlib','sklearn','rpy2'
       ],
     license="Propriety",
     keywords="Long read",
